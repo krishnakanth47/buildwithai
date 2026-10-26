@@ -1,6 +1,7 @@
 {
-  "name": "arrc",
-  "version": "0.1.0",
+  "name": "voxora",
+  "version": "1.0.0",
+  "description": "Multilingual, voice-enabled desktop productivity assistant (Your Voice. Your Workflow.)",
   "private": true,
   "type": "module",
   "scripts": { "start": "node server.js" }

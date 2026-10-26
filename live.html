@@ -2,245 +2,2404 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ARRC Console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voxora — Your Voice. Your Workflow.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#f4f7fb; --panel:rgba(255,255,255,.86); --line:rgba(15,76,129,.14); --ink:#0f1c2e; --muted:#5b6b80;
-  --cyan:#0b7fab; --cyan2:#0ea5c6; --amber:#d97706; --red:#dc2626; --green:#15803d;
+:root {
+  --bg-dark: #090c15;
+  --bg-card: #111625;
+  --bg-card-subtle: #161c2e;
+  --bg-card-hover: #1c243a;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(6, 182, 212, 0.4);
+  --border-accent: rgba(139, 92, 246, 0.3);
+  
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  
+  --cyan: #06b6d4;
+  --cyan-glow: rgba(6, 182, 212, 0.22);
+  --violet: #8b5cf6;
+  --violet-glow: rgba(139, 92, 246, 0.25);
+  
+  --emerald: #10b981;
+  --emerald-bg: rgba(16, 185, 129, 0.12);
+  --amber: #f59e0b;
+  --amber-bg: rgba(245, 158, 11, 0.12);
+  --rose: #f43f5e;
+  --rose-bg: rgba(244, 63, 94, 0.12);
+
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 25px rgba(6, 182, 212, 0.15);
 }
-*{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{background:radial-gradient(1200px 700px at 50% 38%,#e3f1fb 0%,var(--bg) 62%);color:var(--ink);font:15px/1.45 "Space Grotesk",system-ui,sans-serif;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;background:
-  linear-gradient(transparent 0 calc(100% - 1px),rgba(11,127,171,.06) 0) 0 0/100% 32px,
-  linear-gradient(90deg,transparent 0 calc(100% - 1px),rgba(11,127,171,.06) 0) 0 0/32px 100%}
-.wrap{position:relative;max-width:1280px;margin:0 auto;padding:20px 16px 32px;display:grid;gap:16px;grid-template-columns:300px 1fr 320px;grid-template-areas:"left core right"}
-@media (max-width:1100px){.wrap{grid-template-columns:1fr;grid-template-areas:"core" "left" "right"}}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;backdrop-filter:blur(6px);box-shadow:0 6px 24px rgba(15,28,46,.06)}
-.label{font:600 11px/1 "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.left{grid-area:left;display:flex;flex-direction:column;gap:16px}
-.right{grid-area:right;display:flex;flex-direction:column;gap:16px;min-height:0}
-.core{grid-area:core;display:flex;flex-direction:column;align-items:center;gap:18px;padding-top:6px}
 
-h1{margin:0;font-size:28px;letter-spacing:.32em;font-weight:700;text-align:center}
-h1 span{color:var(--cyan)}
-.tag{color:var(--muted);text-align:center;margin-top:4px;font-size:13px}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; width: 100%; background: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
 
-/* reactor */
-.reactor{position:relative;width:min(380px,82vw);aspect-ratio:1}
-.reactor svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.spin{transform-origin:50% 50%;animation:spin 18s linear infinite}
-.spin.r{animation-direction:reverse;animation-duration:26s}
-.spin.f{animation-duration:6s}
-@keyframes spin{to{transform:rotate(360deg)}}
-.glow{filter:drop-shadow(0 0 4px rgba(11,127,171,.35))}
-.center{position:absolute;inset:28%;border-radius:50%;display:grid;place-items:center;text-align:center;
-  background:radial-gradient(circle,rgba(14,165,198,.20),rgba(14,165,198,.04) 62%,transparent 70%);transition:background .4s}
-.center .state{font:600 12px "JetBrains Mono",monospace;letter-spacing:.2em;color:var(--cyan)}
-.center .big{font-size:20px;font-weight:700;margin-top:4px;max-width:150px;word-break:break-word}
-.reactor.fire .center{background:radial-gradient(circle,rgba(255,181,71,.45),rgba(255,181,71,.06) 62%,transparent 70%)}
-.reactor.fire .center .state{color:var(--amber)}
-.reactor.deny .center{background:radial-gradient(circle,rgba(255,93,108,.45),rgba(255,93,108,.06) 62%,transparent 70%)}
-.reactor.deny .center .state{color:var(--red)}
-.reactor.fire .spin{animation-duration:2s}
-.reactor.fire .spin.r{animation-duration:3s}
+/* Subtle dark gradient backdrop */
+body {
+  display: flex;
+  background: 
+    radial-gradient(ellipse 900px 500px at 15% 10%, rgba(139, 92, 246, 0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 900px 500px at 85% 20%, rgba(6, 182, 212, 0.07) 0%, transparent 70%),
+    #090c15;
+  overflow-x: hidden;
+}
 
-.now{width:100%;max-width:640px;text-align:center}
-.now .cmd{font-size:22px;font-weight:500;min-height:32px}
-.now .cmd q{color:var(--cyan)}
-.now .res{color:var(--muted);margin-top:6px;min-height:22px}
+/* App Container Layout */
+.app-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
 
-.call{font-size:13px;color:var(--muted)}
-.call b{display:block;font-size:26px;color:var(--ink);letter-spacing:.04em;margin-top:6px;font-family:"JetBrains Mono",monospace}
-.call .hint{margin-top:10px;font-size:13px}
-.chips{display:flex;flex-direction:column;gap:8px}
-.chip{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.9)}
-.chip i{font-style:normal;font:600 12px "JetBrains Mono",monospace}
-.ok{color:var(--green)} .warn{color:var(--amber)} .bad{color:var(--red)}
-.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;margin-right:6px;box-shadow:0 0 6px currentColor}
+/* Sidebar */
+.sidebar {
+  width: 270px;
+  background: #0d111d;
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  z-index: 100;
+  transition: transform 0.25s ease;
+}
 
-.caps{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.cap{display:flex;gap:8px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:10px;font-size:13px;background:rgba(255,255,255,.9);transition:all .3s}
-.cap .ic{width:22px;text-align:center}
-.cap.hot{border-color:var(--amber);background:rgba(255,181,71,.12);box-shadow:0 0 18px rgba(255,181,71,.25)}
+.brand {
+  padding: 24px 20px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
 
-.feed{display:flex;flex-direction:column;gap:8px;max-height:58vh;overflow:auto;padding-right:2px}
-.item{border:1px solid var(--line);border-left:3px solid var(--cyan2);border-radius:10px;padding:9px 11px;background:rgba(255,255,255,.9)}
-.item.refused{border-left-color:var(--red)}
-.item.new{animation:flash 1.4s ease-out}
-@keyframes flash{from{background:rgba(14,165,198,.16)}}
-.item .top{display:flex;justify-content:space-between;gap:8px;font:12px "JetBrains Mono",monospace;color:var(--muted)}
-.item .act{color:var(--cyan)} .item.refused .act{color:var(--red)}
-.item .in{margin-top:4px} .item .out{color:var(--muted);font-size:13px;margin-top:2px}
-.empty{color:var(--muted);font-size:14px;text-align:center;padding:24px 0}
-.samples{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
-.samples span{color:var(--ink)}
-.watch{display:flex;flex-direction:column;gap:10px}
-.dls{display:flex;flex-direction:column;gap:8px}
-.dl{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:rgba(255,255,255,.9);display:flex;justify-content:space-between;gap:10px;align-items:center}
-.dl b{display:block;font-weight:600}
-.dl small{color:var(--muted);font:12px "JetBrains Mono",monospace}
-.dl.soon{border-color:var(--amber);background:rgba(217,119,6,.08)}
-.dl.late{border-color:var(--red);background:rgba(220,38,38,.07)}
-.dl button,.add button,.ghostbtn{font:inherit;font-size:13px;border-radius:8px;cursor:pointer;padding:7px 10px}
-.dl button{border:1px solid var(--line);background:#fff;color:var(--ink)}
-.add{display:flex;flex-direction:column;gap:6px}
-.add input{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
-.add button{border:0;background:var(--cyan);color:#fff;font-weight:600}
-.ghostbtn{border:1px solid var(--cyan);background:#fff;color:var(--cyan);font-weight:600}
-.watchmsg{font-size:13px;color:var(--muted);min-height:18px}
-@media (prefers-reduced-motion:reduce){.spin,.item.new{animation:none}}
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--cyan) 0%, var(--violet) 100%);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 20px var(--cyan-glow);
+  flex-shrink: 0;
+}
+
+.brand-icon svg { width: 22px; height: 22px; fill: white; }
+
+.brand-info h1 {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(to right, #ffffff, #cbd5e1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.1;
+}
+
+.brand-info span {
+  font-size: 11px;
+  color: var(--cyan);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Navigation items */
+.nav-menu {
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.nav-link svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  transition: stroke 0.15s;
+}
+
+.nav-link:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.nav-link.active {
+  color: #fff;
+  background: linear-gradient(90deg, rgba(6, 182, 212, 0.15) 0%, rgba(139, 92, 246, 0.08) 100%);
+  border-color: rgba(6, 182, 212, 0.3);
+  font-weight: 600;
+}
+
+.nav-link.active svg {
+  stroke: var(--cyan);
+}
+
+.nav-badge {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: var(--bg-card-subtle);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+  padding: 16px 14px;
+  border-top: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--emerald);
+  box-shadow: 0 0 8px var(--emerald);
+  display: inline-block;
+  margin-right: 6px;
+}
+.pulse-dot.offline { background: var(--rose); box-shadow: 0 0 8px var(--rose); }
+
+/* Main Stage */
+.main-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Top Header Bar */
+.top-bar {
+  height: 68px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(9, 12, 21, 0.85);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-main);
+  padding: 8px;
+  cursor: pointer;
+}
+
+.header-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title h2 {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.header-title p {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chip-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+}
+.chip-tag b { color: var(--text-main); }
+
+/* Content Wrapper */
+.content-area {
+  padding: 28px;
+  max-width: 1380px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Tabs Display Container */
+.tab-section {
+  display: none;
+  animation: fadeIn 0.2s ease-out;
+}
+.tab-section.active {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Common Card */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title svg {
+  width: 18px;
+  height: 18px;
+  color: var(--cyan);
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* Welcome Banner */
+.welcome-banner {
+  background: linear-gradient(135deg, rgba(17, 22, 37, 0.9) 0%, rgba(22, 28, 46, 0.95) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px 30px;
+}
+
+.welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.welcome-text h3 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+.welcome-text h3 span {
+  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.welcome-text p {
+  color: var(--text-muted);
+  font-size: 14px;
+  max-width: 620px;
+  line-height: 1.5;
+}
+
+/* Top Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.stat-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Two Column Layout */
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 24px;
+}
+
+/* Quick Actions Section */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.action-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(6, 182, 212, 0.35);
+  transform: translateY(-1px);
+}
+
+.action-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.action-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.action-meta span {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+/* Voice Reactor Orb */
+.orb-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 30px 20px;
+  position: relative;
+}
+
+.reactor-wrap {
+  position: relative;
+  width: 170px;
+  height: 170px;
+  margin: 10px 0 20px;
+}
+
+.reactor-rings {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.spin-slow {
+  transform-origin: 50% 50%;
+  animation: spin 24s linear infinite;
+}
+.spin-rev {
+  transform-origin: 50% 50%;
+  animation: spin 16s linear infinite reverse;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.orb-center {
+  position: absolute;
+  inset: 24%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, rgba(139, 92, 246, 0.05) 70%, transparent 100%);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.2);
+  transition: all 0.3s;
+}
+
+.orb-center.active {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.35) 0%, rgba(245, 158, 11, 0.05) 70%, transparent 100%);
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
+}
+
+.orb-center.denied {
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.35) 0%, rgba(244, 63, 94, 0.05) 70%, transparent 100%);
+  border-color: rgba(244, 63, 94, 0.5);
+  box-shadow: 0 0 30px rgba(244, 63, 94, 0.3);
+}
+
+.orb-state {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  color: var(--cyan);
+}
+.orb-label {
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 2px;
+  color: #fff;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.last-cmd-box {
+  width: 100%;
+  max-width: 440px;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  text-align: left;
+}
+.last-cmd-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.last-cmd-text {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-main);
+  min-height: 20px;
+}
+.last-cmd-res {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  min-height: 18px;
+}
+
+/* Activity Feed Items */
+.feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.feed-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--cyan);
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+
+.feed-item.refused {
+  border-left-color: var(--rose);
+}
+.feed-item.highlight {
+  animation: flashHighlight 1.5s ease-out;
+}
+@keyframes flashHighlight {
+  0% { background: rgba(6, 182, 212, 0.2); }
+  100% { background: var(--bg-card-subtle); }
+}
+
+.feed-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.feed-act {
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--cyan);
+}
+.feed-item.refused .feed-act { color: var(--rose); }
+
+.feed-time {
+  color: var(--text-dim);
+  font-size: 11px;
+  font-family: var(--font-mono);
+}
+
+.feed-input {
+  font-size: 13px;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.feed-out {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Reminders List */
+.reminders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reminder-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  gap: 14px;
+}
+.reminder-card.due-soon {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.05);
+}
+.reminder-card.overdue {
+  border-color: rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.05);
+}
+
+.reminder-info b {
+  font-size: 14px;
+  display: block;
+  color: var(--text-main);
+}
+.reminder-info small {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  display: inline-block;
+  margin-top: 3px;
+}
+
+/* Buttons and Inputs */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  font-family: var(--font-sans);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--cyan) 0%, #0891b2 100%);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(6, 182, 212, 0.25);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #22d3ee 0%, var(--cyan) 100%);
+}
+
+.btn-secondary {
+  background: var(--bg-card-subtle);
+  border-color: var(--border-subtle);
+  color: var(--text-main);
+}
+.btn-secondary:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border-subtle);
+  color: var(--text-muted);
+}
+.btn-ghost:hover {
+  color: var(--text-main);
+  border-color: var(--cyan);
+}
+
+.btn-danger {
+  background: var(--rose-bg);
+  border-color: rgba(244, 63, 94, 0.3);
+  color: var(--rose);
+}
+
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+.input-box {
+  width: 100%;
+  padding: 10px 14px;
+  background: #090c15;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 13.5px;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.input-box:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+/* File Finder Interface */
+.file-search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.file-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  padding: 5px 12px;
+  border-radius: 99px;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-subtle);
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-chip:hover, .filter-chip.active {
+  background: rgba(6, 182, 212, 0.15);
+  border-color: var(--cyan);
+  color: #fff;
+}
+
+.files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 14px;
+}
+
+.file-item-card {
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.15s;
+}
+.file-item-card:hover {
+  border-color: rgba(6, 182, 212, 0.35);
+  transform: translateY(-2px);
+  background: var(--bg-card-hover);
+}
+
+.file-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.file-ext-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--cyan);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+.file-ext-icon.pdf { color: #f43f5e; background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.2); }
+.file-ext-icon.doc { color: #3b82f6; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.2); }
+.file-ext-icon.sheet { color: #10b981; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); }
+
+.file-details {
+  flex: 1;
+  min-width: 0;
+}
+.file-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.file-meta {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-top: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Focus Session Interface */
+.focus-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.timer-display-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.timer-circle-wrap {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  display: grid;
+  place-items: center;
+}
+
+.timer-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.timer-track {
+  fill: none;
+  stroke: var(--bg-card-subtle);
+  stroke-width: 8;
+}
+
+.timer-progress {
+  fill: none;
+  stroke: url(#timerGradient);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.timer-text-content {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timer-clock {
+  font-size: 44px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.timer-badge {
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--cyan);
+  margin-top: 4px;
+}
+
+.timer-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.presets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.preset-chip {
+  padding: 12px 14px;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.preset-chip:hover, .preset-chip.active {
+  border-color: var(--cyan);
+  background: rgba(6, 182, 212, 0.08);
+}
+.preset-chip b { font-size: 13.5px; color: #fff; }
+.preset-chip span { font-size: 11px; color: var(--text-dim); }
+
+/* Settings Table */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.config-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 13.5px;
+}
+.config-item:last-child { border-bottom: none; }
+.config-label { color: var(--text-muted); }
+.config-value { font-family: var(--font-mono); color: var(--text-main); font-weight: 600; font-size: 12.5px; }
+
+/* Empty state */
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.empty-state svg { width: 36px; height: 36px; stroke: var(--text-dim); opacity: 0.6; }
+.empty-state p { font-size: 13.5px; }
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 999;
+}
+
+.toast {
+  background: #1e2638;
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--cyan);
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  font-size: 13.5px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideToast 0.25s ease-out;
+}
+.toast.success { border-left-color: var(--emerald); }
+.toast.error { border-left-color: var(--rose); }
+
+@keyframes slideToast {
+  from { transform: translateX(50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Mobile responsive */
+@media (max-width: 1024px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .grid-2col { grid-template-columns: 1fr; }
+  .focus-container { grid-template-columns: 1fr; }
+  .settings-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+  }
+  .mobile-menu-btn { display: block; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .actions-grid { grid-template-columns: 1fr; }
+  .content-area { padding: 18px 14px; }
+  .top-bar { padding: 0 16px; }
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <aside class="left">
-    <div class="panel call">
-      <div class="label">Call ARRC</div>
-      Dial from your phone
-      <b id="phone">—</b>
-      <div class="hint">Speak in Hindi, English, Telugu or any mix. Powered by Sarvam: Saaras listens, Sarvam-105B decides, Bulbul speaks.</div>
-    </div>
-    <div class="panel">
-      <div class="label">System</div>
-      <div class="chips">
-        <div class="chip"><span>Laptop link</span><i id="link" class="ok"><span class="dot"></span>ONLINE</i></div>
-        <div class="chip"><span>Owner lock</span><i id="lock">—</i></div>
-        <div class="chip"><span>Actions today</span><i id="count">0</i></div>
-        <div class="chip"><span>Refused callers</span><i id="refused">0</i></div>
+
+<div class="app-layout">
+  <!-- Left Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="white" stroke-width="2"/>
+          <line x1="12" y1="19" x2="12" y2="22" stroke="white" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="brand-info">
+        <h1>Voxora</h1>
+        <span>Your Voice. Your Workflow.</span>
       </div>
     </div>
-    <div class="panel samples">
-      <div class="label">Try saying</div>
-      <div><span>“Mera EM5120 assignment kholo”</span></div>
-      <div><span>“25 minute focus session for my assignment”</span></div>
-      <div><span>“Remind me, DBMS project due tomorrow 5 pm”</span></div>
-      <div><span>“YouTube pe Arijit Singh ke gaane chalao”</span></div>
-      <div><span>“Work mode on karo”</span></div>
-      <div><span>“5 minute ka timer lagao chai ke liye”</span></div>
-      <div><span>“Laptop se bolo, hello judges”</span></div>
-      <div><span>“Take a screenshot”</span></div>
-      <div><span>“Volume kam karo”</span></div>
+
+    <nav class="nav-menu">
+      <a class="nav-link active" data-tab="dashboard">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-link" data-tab="files">
+        <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <span>File Finder</span>
+        <span class="nav-badge" id="navFileCount">...</span>
+      </a>
+      <a class="nav-link" data-tab="focus">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Focus Sessions</span>
+      </a>
+      <a class="nav-link" data-tab="reminders">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>Reminders</span>
+        <span class="nav-badge" id="navReminderCount">0</span>
+      </a>
+      <a class="nav-link" data-tab="activity">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Activity Log</span>
+      </a>
+      <a class="nav-link" data-tab="settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="status-pill">
+        <span><span class="pulse-dot" id="serverDot"></span><span id="serverStatusText">Connecting...</span></span>
+        <span style="font-family:var(--font-mono);color:var(--text-dim);" id="serverPortText">:3710</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);text-align:center;">
+        Voxora Desktop v1.0.0
+      </div>
     </div>
   </aside>
 
-  <main class="core">
-    <div>
-      <h1>A<span>.</span>R<span>.</span>R<span>.</span>C</h1>
-      <div class="tag">Your laptop, on a phone call. In your language.</div>
-    </div>
-    <div class="reactor" id="reactor" aria-hidden="true">
-      <svg viewBox="0 0 200 200">
-        <g class="spin glow"><circle cx="100" cy="100" r="96" fill="none" stroke="#0b7fab" stroke-opacity=".55" stroke-width="1" stroke-dasharray="2 6"/></g>
-        <g class="spin r"><circle cx="100" cy="100" r="86" fill="none" stroke="#0ea5c6" stroke-opacity=".35" stroke-width="6" stroke-dasharray="40 14"/></g>
-        <g class="spin f glow"><circle cx="100" cy="100" r="74" fill="none" stroke="#0b7fab" stroke-width="1.5" stroke-dasharray="90 30 20 30"/></g>
-        <g class="spin"><circle cx="100" cy="100" r="64" fill="none" stroke="#0b7fab" stroke-opacity=".25" stroke-width="10" stroke-dasharray="3 5"/></g>
-      </svg>
-      <div class="center"><div><div class="state" id="state">STANDBY</div><div class="big" id="big">Ready</div></div></div>
-    </div>
-    <div class="now panel">
-      <div class="label">Last command</div>
-      <div class="cmd" id="cmd">Waiting for your call…</div>
-      <div class="res" id="res"></div>
-    </div>
-    <div class="panel" style="width:100%;max-width:640px">
-      <div class="label">Capabilities</div>
-      <div class="caps" id="caps"></div>
+  <!-- Main Content View -->
+  <main class="main-stage">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="mobile-menu-btn" id="menuToggle" aria-label="Toggle Navigation">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="header-title">
+          <h2 id="currentTabHeading">Dashboard Overview</h2>
+          <p id="currentTabSub">Voice agent controls, laptop tasks & real-time monitoring</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="chip-tag" id="ownerLockBadge">
+          <span>Lock:</span> <b id="ownerLockText">Detecting...</b>
+        </div>
+        <div class="chip-tag" id="batteryBadge">
+          <span>Battery:</span> <b id="batteryStatusText">--%</b>
+        </div>
+        <button class="btn btn-primary btn-sm" id="quickSearchBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Find File</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="content-area">
+
+      <!-- SECTION 1: DASHBOARD OVERVIEW -->
+      <section class="tab-section active" id="tab-dashboard">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner card">
+          <div class="welcome-text">
+            <h3>Welcome to <span>Voxora</span></h3>
+            <p>Multilingual, voice-enabled desktop productivity assistant. Dial your Sarvam voice line to open documents, manage focus sessions, run routines, and trigger laptop workflows hands-free.</p>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:12px;color:var(--text-dim);">Assigned Voice Line</div>
+            <b style="font-size:18px;font-family:var(--font-mono);color:var(--cyan);display:block;margin-top:2px;" id="phoneHeaderDisplay">Local Mode</b>
+          </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-top">
+              <span>Laptop Server</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            </div>
+            <div class="stat-value" id="cardServerStatus">ONLINE</div>
+            <div class="stat-meta"><span class="pulse-dot"></span> Port 3710 · Localhost</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <span>Owner Security</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="stat-value" id="cardOwnerStatus">PROTECTED</div>
+            <div class="stat-meta" id="cardOwnerMeta">Strict caller verification</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <span>Active Deadlines</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="stat-value" id="cardDeadlinesCount">0</div>
+            <div class="stat-meta" id="cardDeadlinesMeta">Urgent calls ready</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <span>Indexed Documents</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="stat-value" id="cardIndexedCount">...</div>
+            <div class="stat-meta">Ready for voice search</div>
+          </div>
+        </div>
+
+        <!-- 2 Column Section: Quick Actions + Reactor Orb & Activity -->
+        <div class="grid-2col">
+          <!-- Left Col: Quick Actions & Active Focus -->
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <!-- Quick Actions Card -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h4 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    Quick Laptop Actions
+                  </h4>
+                  <div class="card-subtitle">Trigger supported assistant commands safely from this console</div>
+                </div>
+              </div>
+
+              <div class="actions-grid">
+                <button class="action-btn" data-action="system_status">
+                  <div class="action-icon">🔋</div>
+                  <div class="action-meta">
+                    <b>System Status</b>
+                    <span>Check battery, date & time</span>
+                  </div>
+                </button>
+
+                <button class="action-btn" data-action="run_routine" data-input="work">
+                  <div class="action-icon">⚡</div>
+                  <div class="action-meta">
+                    <b>Work Routine</b>
+                    <span>VS Code, Gmail, Calendar</span>
+                  </div>
+                </button>
+
+                <button class="action-btn" data-action="open_website" data-input="https://mail.google.com">
+                  <div class="action-icon">✉️</div>
+                  <div class="action-meta">
+                    <b>Open Gmail</b>
+                    <span>Launch webmail in browser</span>
+                  </div>
+                </button>
+
+                <button class="action-btn" data-action="open_website" data-input="https://www.youtube.com">
+                  <div class="action-icon">▶️</div>
+                  <div class="action-meta">
+                    <b>YouTube Music</b>
+                    <span>Play media in browser</span>
+                  </div>
+                </button>
+
+                <button class="action-btn" data-action="take_screenshot">
+                  <div class="action-icon">📸</div>
+                  <div class="action-meta">
+                    <b>Take Screenshot</b>
+                    <span>Save into Pictures/Jarvis</span>
+                  </div>
+                </button>
+
+                <button class="action-btn" data-action="media_control" data-input="play">
+                  <div class="action-icon">⏯️</div>
+                  <div class="action-meta">
+                    <b>Toggle Media Play</b>
+                    <span>Play / Pause track</span>
+                  </div>
+                </button>
+
+                <button class="action-btn" data-action="show_notes">
+                  <div class="action-icon">📝</div>
+                  <div class="action-meta">
+                    <b>View Notes</b>
+                    <span>Open notes in Notepad</span>
+                  </div>
+                </button>
+
+                <button class="action-btn" id="quickLockBtn">
+                  <div class="action-icon">🔒</div>
+                  <div class="action-meta">
+                    <b>Lock Laptop</b>
+                    <span>Secure Windows session</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Active Focus Widget -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h4 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Focus Session
+                  </h4>
+                  <div class="card-subtitle">Active pomodoro & deep work tracker</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="jumpToFocusBtn">Open Timer</button>
+              </div>
+
+              <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg-card-subtle);padding:16px 20px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);">
+                <div>
+                  <div style="font-size:12px;color:var(--text-dim);font-weight:600;text-transform:uppercase;">Current Session</div>
+                  <b style="font-size:16px;color:#fff;display:block;margin-top:2px;" id="dashFocusTopic">Ready to start focus session</b>
+                  <span style="font-size:12px;color:var(--cyan);" id="dashFocusStatus">Standby</span>
+                </div>
+                <div style="text-align:right;">
+                  <span style="font-size:32px;font-weight:800;font-family:var(--font-mono);color:#fff;" id="dashFocusTime">25:00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Col: Voice Orb & Recent Live Activity -->
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <!-- Reactor Orb -->
+            <div class="card orb-card">
+              <div class="card-subtitle" style="text-transform:uppercase;letter-spacing:0.1em;font-size:11px;font-weight:700;">Voxora Engine State</div>
+              <div class="reactor-wrap">
+                <svg class="reactor-rings" viewBox="0 0 200 200">
+                  <g class="spin-slow"><circle cx="100" cy="100" r="92" fill="none" stroke="#06b6d4" stroke-opacity="0.3" stroke-width="1.5" stroke-dasharray="4 8"/></g>
+                  <g class="spin-rev"><circle cx="100" cy="100" r="80" fill="none" stroke="#8b5cf6" stroke-opacity="0.35" stroke-width="3" stroke-dasharray="35 15"/></g>
+                  <g class="spin-slow"><circle cx="100" cy="100" r="68" fill="none" stroke="#06b6d4" stroke-opacity="0.2" stroke-width="8" stroke-dasharray="10 10"/></g>
+                </svg>
+                <div class="orb-center" id="orbCenter">
+                  <div class="orb-state" id="orbState">READY</div>
+                  <div class="orb-label" id="orbLabel">Listening</div>
+                </div>
+              </div>
+
+              <div class="last-cmd-box">
+                <div class="last-cmd-title">Last Received Command</div>
+                <div class="last-cmd-text" id="lastCmdText">Awaiting voice or dashboard input…</div>
+                <div class="last-cmd-res" id="lastCmdRes">Ready to serve requests.</div>
+              </div>
+            </div>
+
+            <!-- Recent Activity Preview -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h4 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Live Activity Feed
+                  </h4>
+                  <div class="card-subtitle">Real-time audit log of executed actions</div>
+                </div>
+                <button class="btn btn-ghost btn-sm" id="jumpToActivityBtn">View All</button>
+              </div>
+
+              <div class="feed-list" id="dashActivityFeed" style="max-height:240px;">
+                <div class="empty-state">
+                  <p>No actions logged yet today.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: FILE FINDER -->
+      <section class="tab-section" id="tab-files">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                Document & File Discovery
+              </h3>
+              <div class="card-subtitle">Voice-optimized local indexing across Desktop, Documents, Downloads, OneDrive & Pictures</div>
+            </div>
+            <div class="chip-tag" id="fileIndexTag">
+              <span>Indexed:</span> <b id="fileIndexCount">7,200+ docs</b>
+            </div>
+          </div>
+
+          <div class="file-search-bar">
+            <input type="text" class="input-box" id="fileSearchInput" placeholder="Search by name, course code (e.g. EM5120), subject, or extension...">
+            <button class="btn btn-primary" id="fileSearchBtn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span>Search</span>
+            </button>
+          </div>
+
+          <div class="file-filters">
+            <span class="filter-chip active" data-filter="all">All Documents</span>
+            <span class="filter-chip" data-filter=".pdf">PDFs</span>
+            <span class="filter-chip" data-filter=".docx,.doc">Word Docs</span>
+            <span class="filter-chip" data-filter=".pptx,.ppt">Slides</span>
+            <span class="filter-chip" data-filter=".xlsx,.xls,.csv">Sheets</span>
+            <span class="filter-chip" data-filter=".txt,.md">Notes / Markdown</span>
+            <span class="filter-chip" data-filter=".png,.jpg,.jpeg">Images</span>
+          </div>
+
+          <div style="font-size:12px;color:var(--text-dim);margin-bottom:14px;">
+            Try voice command: <span style="color:var(--cyan);font-style:italic;">“Mera EM5120 assignment kholo”</span> or <span style="color:var(--cyan);font-style:italic;">“Find project proposal pdf”</span>
+          </div>
+
+          <!-- Files Grid -->
+          <div class="files-grid" id="filesResultsContainer">
+            <div class="empty-state" style="grid-column: 1 / -1;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <p>Type a document name, assignment title, or topic above to search your indexed files.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: FOCUS SESSIONS -->
+      <section class="tab-section" id="tab-focus">
+        <div class="focus-container">
+          <!-- Timer Display Card -->
+          <div class="card timer-display-card">
+            <div class="timer-circle-wrap">
+              <svg class="timer-svg" viewBox="0 0 100 100">
+                <defs>
+                  <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#06b6d4" />
+                    <stop offset="100%" stop-color="#8b5cf6" />
+                  </linearGradient>
+                </defs>
+                <circle class="timer-track" cx="50" cy="50" r="44"/>
+                <circle class="timer-progress" id="timerProgressCircle" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="0"/>
+              </svg>
+              <div class="timer-text-content">
+                <div class="timer-clock" id="timerClockDisplay">25:00</div>
+                <div class="timer-badge" id="timerBadgeDisplay">READY</div>
+              </div>
+            </div>
+
+            <div style="margin-top:20px;text-align:center;">
+              <h4 style="font-size:16px;color:#fff;" id="activeFocusLabel">Focus Session</h4>
+              <p style="font-size:13px;color:var(--text-dim);margin-top:4px;" id="activeFocusSub">Deep work sprint with ambient sound</p>
+            </div>
+
+            <div class="timer-controls">
+              <button class="btn btn-primary" id="timerStartBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>Start Session</span>
+              </button>
+              <button class="btn btn-secondary" id="timerPauseBtn" style="display:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                <span>Pause</span>
+              </button>
+              <button class="btn btn-ghost" id="timerResetBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                <span>Reset</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Focus Options & Presets -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Focus Configuration
+                </h3>
+                <div class="card-subtitle">Set your session topic, duration & companion settings</div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div>
+                <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;">Session Topic or Goal</label>
+                <input type="text" class="input-box" id="focusTopicInput" placeholder="e.g. DBMS Final Assignment, Research Paper, Code Review">
+              </div>
+
+              <div>
+                <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;">Choose Duration</label>
+                <div class="presets-grid">
+                  <div class="preset-chip" data-mins="15">
+                    <b>15 Minutes</b>
+                    <span>Quick Sprint</span>
+                  </div>
+                  <div class="preset-chip active" data-mins="25">
+                    <b>25 Minutes</b>
+                    <span>Standard Pomodoro</span>
+                  </div>
+                  <div class="preset-chip" data-mins="45">
+                    <b>45 Minutes</b>
+                    <span>Deep Work</span>
+                  </div>
+                  <div class="preset-chip" data-mins="60">
+                    <b>60 Minutes</b>
+                    <span>Extended Block</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:8px;padding-top:14px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:10px;">
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-main);cursor:pointer;">
+                  <input type="checkbox" id="focusMusicToggle" checked style="accent-color:var(--cyan);width:16px;height:16px;">
+                  <span>Play focus music in browser (Lofi stream)</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-main);cursor:pointer;">
+                  <input type="checkbox" id="focusVoiceAnnounce" checked style="accent-color:var(--cyan);width:16px;height:16px;">
+                  <span>Announce completion via laptop speakers</span>
+                </label>
+              </div>
+
+              <div style="background:var(--bg-card-subtle);padding:14px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);font-size:12px;color:var(--text-muted);">
+                💡 <b>Voice Trigger:</b> Say <span style="color:var(--cyan);">“25 minute focus session for my assignment”</span> on a phone call. Voxora will open matching files, start music, and phone you when time is up.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: REMINDERS & DEADLINES -->
+      <section class="tab-section" id="tab-reminders">
+        <div class="grid-2col">
+          <!-- Left Col: Deadlines List -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                  Upcoming Deadlines & Reminders
+                </h3>
+                <div class="card-subtitle">Active deadline tracking with automated phone call alerts</div>
+              </div>
+            </div>
+
+            <div class="reminders-list" id="remindersContainer">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <p>No active deadlines yet. Add one below or say “Remind me, project due tomorrow 5 pm” on your phone call.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Col: Add Reminder & Outbound Phone Monitor -->
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <!-- Create Reminder Card -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h4 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Create Reminder
+                  </h4>
+                  <div class="card-subtitle">Specify what is due and when</div>
+                </div>
+              </div>
+
+              <form id="addReminderForm" style="display:flex;flex-direction:column;gap:12px;">
+                <div>
+                  <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;">Reminder Title</label>
+                  <input type="text" class="input-box" id="newReminderTitle" placeholder="e.g. EM5120 Assignment, Submit invoice" required>
+                </div>
+                <div>
+                  <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;">Due Time</label>
+                  <input type="text" class="input-box" id="newReminderWhen" placeholder="e.g. tomorrow 5 pm, in 30 minutes, 2026-10-28 18:00" required>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button type="button" class="btn btn-ghost btn-sm quick-time-btn" data-time="in 30 minutes">+30 Mins</button>
+                  <button type="button" class="btn btn-ghost btn-sm quick-time-btn" data-time="in 2 hours">+2 Hours</button>
+                  <button type="button" class="btn btn-ghost btn-sm quick-time-btn" data-time="tonight 9 pm">Tonight 9pm</button>
+                  <button type="button" class="btn btn-ghost btn-sm quick-time-btn" data-time="tomorrow 5 pm">Tomorrow 5pm</button>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:6px;">
+                  <span>Add Reminder</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Outbound Phone Service Status -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h4 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Urgent Phone Notifications
+                  </h4>
+                  <div class="card-subtitle">Sarvam AI Outbound Call Integration</div>
+                </div>
+                <div class="chip-tag" id="outboundModeTag">
+                  <span id="outboundModeText">Checking...</span>
+                </div>
+              </div>
+
+              <div style="font-size:12.5px;color:var(--text-muted);display:flex;flex-direction:column;gap:8px;">
+                <p>Voxora phones you automatically at staged intervals before pending deadlines:</p>
+                <ul style="padding-left:18px;line-height:1.6;">
+                  <li>24 hours, 3 hours, 1 hour, and 15 minutes before due time</li>
+                  <li>At exact due time if not marked as submitted</li>
+                  <li>When laptop battery drops to 15% while unplugged</li>
+                </ul>
+                <div style="margin-top:10px;">
+                  <button class="btn btn-secondary btn-sm" id="testCallBtn" type="button">
+                    <span>📞 Test Urgent Call Now</span>
+                  </button>
+                  <div id="testCallFeedback" style="font-size:12px;color:var(--cyan);margin-top:6px;min-height:16px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: ACTIVITY LOG -->
+      <section class="tab-section" id="tab-activity">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Complete Activity Audit Log
+              </h3>
+              <div class="card-subtitle">Comprehensive stream of caller requests, tool executions, and security checks</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-ghost btn-sm active" id="filterAllBtn">All Events</button>
+              <button class="btn btn-ghost btn-sm" id="filterSuccessBtn">Successful</button>
+              <button class="btn btn-ghost btn-sm" id="filterRefusedBtn">Refused</button>
+            </div>
+          </div>
+
+          <div class="feed-list" id="fullActivityFeed" style="max-height:65vh;">
+            <div class="empty-state">
+              <p>No activity recorded yet.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 6: SETTINGS -->
+      <section class="tab-section" id="tab-settings">
+        <div class="settings-grid">
+          <!-- Server & Engine Configuration -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h4 class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                  Server Runtime & Endpoints
+                </h4>
+                <div class="card-subtitle">Local laptop action server state</div>
+              </div>
+            </div>
+
+            <div>
+              <div class="config-item">
+                <span class="config-label">Application Name</span>
+                <span class="config-value">Voxora</span>
+              </div>
+              <div class="config-item">
+                <span class="config-label">Local Port</span>
+                <span class="config-value" id="cfgPort">3710</span>
+              </div>
+              <div class="config-item">
+                <span class="config-label">Process Uptime</span>
+                <span class="config-value" id="cfgUptime">--</span>
+              </div>
+              <div class="config-item">
+                <span class="config-label">Platform Host</span>
+                <span class="config-value">Windows (x64)</span>
+              </div>
+              <div class="config-item">
+                <span class="config-label">Local Console Security</span>
+                <span class="config-value" style="color:var(--emerald);">ISOLATED (Localhost Only)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Voice Auth & Security Config -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h4 class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Authentication & Security
+                </h4>
+                <div class="card-subtitle">Caller restrictions & credentials guard (secrets hidden)</div>
+              </div>
+            </div>
+
+            <div>
+              <div class="config-item">
+                <span class="config-label">Bearer Token Verification</span>
+                <span class="config-value" id="cfgTokenStatus">Configured (Constant-Time SHA)</span>
+              </div>
+              <div class="config-item">
+                <span class="config-label">Owner Mobile Lock</span>
+                <span class="config-value" id="cfgOwnerNumber">Masked (...10)</span>
+              </div>
+              <div class="config-item">
+                <span class="config-label">Anonymous Callers</span>
+                <span class="config-value" id="cfgAllowNoCaller">Blocked</span>
+              </div>
+              <div class="config-item">
+                <span class="config-label">Command Safety Policy</span>
+                <span class="config-value" style="color:var(--emerald);">Fixed Allowlist (No Shell)</span>
+              </div>
+              <div class="config-item">
+                <span class="config-label">Public Tunnel Exposure</span>
+                <span class="config-value" style="color:var(--emerald);">/action & /tools Only</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Storage Locations -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h4 class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  Storage & Local Folders
+                </h4>
+                <div class="card-subtitle">File paths used for notes, screenshots and indexes</div>
+              </div>
+            </div>
+
+            <div>
+              <div class="config-item">
+                <span class="config-label">Notes Storage File</span>
+                <span class="config-value" id="cfgNotesPath">Documents/Jarvis Notes.md</span>
+              </div>
+              <div class="config-item">
+                <span class="config-label">Screenshots Directory</span>
+                <span class="config-value">Pictures/Jarvis</span>
+              </div>
+              <div class="config-item">
+                <span class="config-label">Indexed File Count</span>
+                <span class="config-value" id="cfgIndexCount">--</span>
+              </div>
+              <div style="margin-top:14px;display:flex;gap:10px;">
+                <button class="btn btn-secondary btn-sm" data-action="show_notes">Open Notes in Notepad</button>
+                <button class="btn btn-secondary btn-sm" data-action="open_app" data-input="downloads">Open Downloads</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Voice Engine Attribution -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h4 class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                  Product Attribution & Architecture
+                </h4>
+                <div class="card-subtitle">Upstream project foundation & technology stack</div>
+              </div>
+            </div>
+
+            <div style="font-size:13px;color:var(--text-muted);line-height:1.6;">
+              <p><b>Voxora</b> was evolved from the ARRC platform originally created for the Sarvam AI Hackathon (October 2026).</p>
+              <p style="margin-top:8px;">Powered by the Sarvam AI stack: <b>Saaras</b> for Indian language speech recognition, <b>Sarvam-105B</b> for intent parsing and action resolution, and <b>Bulbul</b> for natural speech synthesis.</p>
+              <div style="margin-top:14px;padding:10px 14px;border-radius:var(--radius-sm);background:var(--bg-card-subtle);font-size:12px;color:var(--text-dim);">
+                Tagline: <b>Your Voice. Your Workflow.</b><br>
+                License: Retained under MIT with original upstream attribution preserved.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
   </main>
-
-  <aside class="right">
-    <div class="panel watch">
-      <div class="label">ARRC is watching</div>
-      <div class="chip"><span>Urgent calls to you</span><i id="outbound">—</i></div>
-      <div id="dls" class="dls"><div class="empty">No deadlines yet.</div></div>
-      <form id="addDl" class="add">
-        <input id="dlTitle" placeholder="What is due? e.g. DBMS project" required>
-        <input id="dlWhen" placeholder="When? e.g. tomorrow 5 pm, in 2 minutes" required>
-        <button type="submit">Add deadline</button>
-      </form>
-      <button id="testCall" class="ghostbtn" type="button">📞 Test urgent call</button>
-      <div id="watchMsg" class="watchmsg"></div>
-    </div>
-    <div class="panel" style="display:flex;flex-direction:column;min-height:0">
-      <div class="label">Live activity</div>
-      <div class="feed" id="feed"><div class="empty">No actions yet. Call the number.</div></div>
-    </div>
-  </aside>
 </div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
 <script>
-const CAPS = {
-  open_website:['🌐','Open any website'], web_search:['🔎','Google search'], play_youtube:['▶️','Play on YouTube'],
-  open_app:['🗂️','Open apps'], media_control:['🎚️','Music and volume'], run_routine:['⚡','Work / study modes'],
-  set_timer:['⏱️','Timers that talk'], speak_on_laptop:['🔊','Laptop speaks'], take_screenshot:['📸','Screenshots'],
-  draft_email:['✉️','Draft emails'], directions:['🧭','Directions'], weather:['⛅','Weather'],
-  take_note:['📝','Take notes'], read_notes:['📖','Read notes'], show_notes:['🗒️','Show notes'],
-  system_status:['🔋','Battery and time'], lock_screen:['🔒','Lock laptop'],
-  find_file:['📂','Find and open any file'], focus_session:['🎯','Focus sessions'],
-  add_deadline:['⏰','Deadline calls'], list_deadlines:['📋','What is due'], finish_deadline:['✅','Mark submitted'],
-  call_owner:['📞','ARRC calls you'],
-};
-const NICE = Object.fromEntries(Object.entries(CAPS).map(([k,v])=>[k,v[1]]));
-const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// ---------- UI State & Elements ----------
 const $ = id => document.getElementById(id);
-let seen = null, idle;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-fetch('/status').then(r=>r.json()).then(s=>{
-  $('phone').textContent = s.phone || 'Your Sarvam number';
-  $('lock').innerHTML = s.lock ? `<span class="ok"><span class="dot"></span>ON · ${esc(s.owner)}</span>` : '<span class="warn"><span class="dot"></span>OFF</span>';
-  $('caps').innerHTML = s.actions.filter(a=>CAPS[a]).map(a=>`<div class="cap" data-a="${a}"><span class="ic">${CAPS[a][0]}</span>${esc(CAPS[a][1])}</div>`).join('');
-}).catch(()=>{});
+let activeTab = 'dashboard';
+let activityData = [];
+let monitorData = { configured: false, deadlines: [] };
+let lastActivityKey = null;
+let currentFilter = 'all';
 
-function pulse(e){
-  const r = $('reactor');
-  r.classList.remove('fire','deny'); void r.offsetWidth;
-  r.classList.add(e.refused ? 'deny' : 'fire');
-  $('state').textContent = e.refused ? 'REFUSED' : 'EXECUTING';
-  $('big').textContent = e.refused ? 'Not owner' : (NICE[e.action] || e.action);
-  $('cmd').innerHTML = e.input && e.input !== 'none' ? `<q>${esc(e.input)}</q>` : esc(NICE[e.action] || e.action);
-  $('res').textContent = e.result || '';
-  document.querySelectorAll('.cap').forEach(c=>c.classList.toggle('hot', c.dataset.a === e.action));
-  clearTimeout(idle);
-  idle = setTimeout(()=>{ r.classList.remove('fire','deny'); $('state').textContent='STANDBY'; $('big').textContent='Ready';
-    document.querySelectorAll('.cap.hot').forEach(c=>c.classList.remove('hot')); }, 6000);
+// Focus Timer State
+let timerState = {
+  durationMins: 25,
+  remainingSeconds: 25 * 60,
+  intervalId: null,
+  status: 'READY', // 'READY', 'RUNNING', 'PAUSED'
+  topic: 'Focus Session'
+};
+
+// Toast notification helper
+function showToast(message, type = 'info') {
+  const container = $('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${esc(message)}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
 }
 
-async function tick(){
-  try{
-    const a = await (await fetch('/activity')).json();
-    const key = JSON.stringify(a[0] || null);
-    if (key === seen) return;
-    const first = seen === null; seen = key;
-    $('count').textContent = a.filter(e=>!e.refused).length;
-    $('refused').textContent = a.filter(e=>e.refused).length;
-    $('feed').innerHTML = a.length ? a.map((e,i)=>`<div class="item ${e.refused?'refused':''} ${!first&&i===0?'new':''}">
-      <div class="top"><span class="act">${esc(e.action)}</span><span>${e.caller?esc(e.caller)+' · ':''}${esc(e.at)}</span></div>
-      ${e.input && e.input!=='none' ? `<div class="in">“${esc(e.input)}”</div>` : ''}<div class="out">${esc(e.result)}</div></div>`).join('')
-      : '<div class="empty">No actions yet. Call the number.</div>';
-    if (!first && a[0]) pulse(a[0]);
-    $('link').innerHTML = '<span class="dot"></span>ONLINE'; $('link').className = 'ok';
-  }catch{ $('link').innerHTML = '<span class="dot"></span>OFFLINE'; $('link').className = 'bad'; }
-}
-setInterval(tick, 700); tick();
+// Navigation Tab Switching
+function switchTab(tabId) {
+  activeTab = tabId;
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.classList.toggle('active', link.dataset.tab === tabId);
+  });
+  document.querySelectorAll('.tab-section').forEach(sec => {
+    sec.classList.toggle('active', sec.id === `tab-${tabId}`);
+  });
 
-const left = m => m < 0 ? 'overdue' : m < 60 ? `${Math.round(m)} min left` : m < 2880 ? `${Math.round(m/60)} h left` : `${Math.round(m/1440)} days left`;
-async function watch(){
-  try{
-    const s = await (await fetch('/monitor')).json();
-    $('outbound').innerHTML = s.configured ? '<span class="ok"><span class="dot"></span>READY</span>' : '<span class="warn"><span class="dot"></span>DRY RUN</span>';
-    $('dls').innerHTML = s.deadlines.length ? s.deadlines.map(d=>`<div class="dl ${d.minutesLeft<0?'late':d.minutesLeft<180?'soon':''}">
-      <div><b>${esc(d.title)}</b><small>${new Date(d.due).toLocaleString('en-IN',{weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})} · ${left(d.minutesLeft)}</small></div>
-      <button data-id="${esc(d.id)}">Submitted</button></div>`).join('') : '<div class="empty">No deadlines yet. Say “remind me…” on a call.</div>';
-  }catch{}
+  const titles = {
+    dashboard: ['Dashboard Overview', 'Voice agent controls, laptop tasks & real-time monitoring'],
+    files: ['File Finder', 'Search & open documents indexed across local storage'],
+    focus: ['Focus Sessions', 'Pomodoro timer, focus music & completion calls'],
+    reminders: ['Reminders & Deadlines', 'Deadline list and automated phone call notifications'],
+    activity: ['Activity Audit Log', 'Real-time feed of all voice & dashboard actions'],
+    settings: ['Settings & Configuration', 'System status, caller authorization & storage paths']
+  };
+  const [head, sub] = titles[tabId] || ['Voxora', 'Your Voice. Your Workflow.'];
+  $('currentTabHeading').textContent = head;
+  $('currentTabSub').textContent = sub;
+
+  // Auto-close sidebar on mobile
+  if (window.innerWidth <= 768) {
+    $('sidebar').classList.remove('open');
+  }
+
+  // Trigger file index warming if entering files tab
+  if (tabId === 'files' && !$('filesResultsContainer').querySelector('.file-item-card')) {
+    performFileSearch('assignment');
+  }
 }
-async function post(path, body){ const r = await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})}); return r.json(); }
-$('dls').addEventListener('click', async e => { const id = e.target.dataset?.id; if (!id) return; $('watchMsg').textContent = (await post('/monitor/done',{id})).result; watch(); });
-$('addDl').addEventListener('submit', async e => { e.preventDefault(); const r = await post('/monitor/add',{title:$('dlTitle').value, when:$('dlWhen').value}); $('watchMsg').textContent = r.result; if (!/couldn|passed|Tell me/.test(r.result)) { $('dlTitle').value=''; $('dlWhen').value=''; } watch(); });
-$('testCall').addEventListener('click', async () => { $('watchMsg').textContent = 'Calling your phone…'; const r = await post('/monitor/test-call'); $('watchMsg').textContent = r.ok ? 'Calling you now. Pick up!' : r.dryRun ? 'Dry run: add the Sarvam outbound keys to .env to place real calls.' : `Call failed (${r.status || r.error}).`; });
-setInterval(watch, 5000); watch();
+
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => switchTab(link.dataset.tab));
+});
+
+$('menuToggle').addEventListener('click', () => {
+  $('sidebar').classList.toggle('open');
+});
+
+$('quickSearchBtn').addEventListener('click', () => {
+  switchTab('files');
+  $('fileSearchInput').focus();
+});
+$('jumpToFocusBtn').addEventListener('click', () => switchTab('focus'));
+$('jumpToActivityBtn').addEventListener('click', () => switchTab('activity'));
+
+// ---------- Status & Server Polling ----------
+async function fetchStatus() {
+  try {
+    const res = await fetch('/status');
+    const s = await res.json();
+    
+    $('serverDot').className = 'pulse-dot';
+    $('serverStatusText').textContent = 'Online';
+    $('cardServerStatus').textContent = 'ONLINE';
+    $('serverPortText').textContent = `:${s.port || 3710}`;
+    
+    // Header phone
+    $('phoneHeaderDisplay').textContent = s.phone || 'Sarvam Voice Line';
+    
+    // Security lock
+    const lockText = s.lock ? `Active (${s.owner || 'Verified'})` : 'Unlocked';
+    $('ownerLockText').textContent = lockText;
+    $('cardOwnerStatus').textContent = s.lock ? 'LOCKED' : 'UNLOCKED';
+    $('cardOwnerMeta').textContent = s.lock ? `Authorized caller: ${s.owner || 'Set'}` : 'Allow all callers';
+
+    // Settings tab info
+    $('cfgPort').textContent = String(s.port || 3710);
+    $('cfgOwnerNumber').textContent = s.owner ? `Masked (${s.owner})` : 'Not configured';
+    $('cfgTokenStatus').textContent = s.tokenConfigured ? 'Configured (Active)' : 'Not set (Missing in .env)';
+    $('cfgAllowNoCaller').textContent = s.allowNoCaller ? 'Allowed (Testing Mode)' : 'Strict (Blocked)';
+    $('cfgNotesPath').textContent = s.notesPath || 'Documents/Jarvis Notes.md';
+    if (s.totalIndexed) {
+      $('navFileCount').textContent = s.totalIndexed;
+      $('cardIndexedCount').textContent = `${s.totalIndexed} files`;
+      $('fileIndexCount').textContent = `${s.totalIndexed} files`;
+      $('cfgIndexCount').textContent = `${s.totalIndexed} files`;
+    }
+    if (s.uptime) {
+      const h = Math.floor(s.uptime / 3600);
+      const m = Math.floor((s.uptime % 3600) / 60);
+      $('cfgUptime').textContent = `${h}h ${m}m`;
+    }
+  } catch (err) {
+    $('serverDot').className = 'pulse-dot offline';
+    $('serverStatusText').textContent = 'Offline';
+    $('cardServerStatus').textContent = 'OFFLINE';
+  }
+}
+
+// Read battery status through safe API
+async function fetchBattery() {
+  try {
+    const res = await fetch('/api/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'system_status' })
+    });
+    const data = await res.json();
+    if (data.ok && data.result) {
+      const m = data.result.match(/battery at (\d+) percent/i);
+      if (m) {
+        const charging = data.result.includes('charging');
+        $('batteryStatusText').textContent = `${m[1]}%${charging ? ' ⚡' : ''}`;
+      }
+    }
+  } catch {}
+}
+
+// ---------- Activity Polling ----------
+async function fetchActivity() {
+  try {
+    const res = await fetch('/activity');
+    activityData = await res.json();
+    const latestKey = JSON.stringify(activityData[0] || null);
+
+    if (latestKey !== lastActivityKey) {
+      const isFirst = lastActivityKey === null;
+      lastActivityKey = latestKey;
+      renderActivityFeed(activityData, isFirst);
+      if (!isFirst && activityData[0]) {
+        pulseOrb(activityData[0]);
+      }
+    }
+  } catch {}
+}
+
+function pulseOrb(entry) {
+  const orb = $('orbCenter');
+  orb.classList.remove('active', 'denied');
+  void orb.offsetWidth;
+  if (entry.refused) {
+    orb.classList.add('denied');
+    $('orbState').textContent = 'REFUSED';
+    $('orbLabel').textContent = 'Denied';
+  } else {
+    orb.classList.add('active');
+    $('orbState').textContent = 'EXECUTING';
+    $('orbLabel').textContent = entry.action;
+  }
+  
+  $('lastCmdText').textContent = entry.input && entry.input !== 'none' ? `“${entry.input}”` : entry.action;
+  $('lastCmdRes').textContent = entry.result || 'Success';
+
+  setTimeout(() => {
+    orb.classList.remove('active', 'denied');
+    $('orbState').textContent = 'READY';
+    $('orbLabel').textContent = 'Listening';
+  }, 4000);
+}
+
+function renderActivityFeed(items, isFirst = false) {
+  const renderItem = (e, i) => `
+    <div class="feed-item ${e.refused ? 'refused' : ''} ${!isFirst && i === 0 ? 'highlight' : ''}">
+      <div class="feed-top">
+        <span class="feed-act">${esc(e.action)}</span>
+        <span class="feed-time">${esc(e.caller ? e.caller + ' · ' : '')}${esc(e.at)}</span>
+      </div>
+      ${e.input && e.input !== 'none' ? `<div class="feed-input">“${esc(e.input)}”</div>` : ''}
+      <div class="feed-out">${esc(e.result)}</div>
+    </div>
+  `;
+
+  // Filtered view for Activity Tab
+  let filtered = items;
+  if (currentFilter === 'success') filtered = items.filter(e => !e.refused);
+  if (currentFilter === 'refused') filtered = items.filter(e => e.refused);
+
+  const fullHtml = filtered.length 
+    ? filtered.map(renderItem).join('') 
+    : '<div class="empty-state"><p>No activity matches filter.</p></div>';
+  $('fullActivityFeed').innerHTML = fullHtml;
+
+  // Short view for Dashboard
+  const dashHtml = items.length 
+    ? items.slice(0, 5).map(renderItem).join('') 
+    : '<div class="empty-state"><p>No actions logged yet today.</p></div>';
+  $('dashActivityFeed').innerHTML = dashHtml;
+}
+
+$('filterAllBtn').addEventListener('click', e => { setFeedFilter('all', e.target); });
+$('filterSuccessBtn').addEventListener('click', e => { setFeedFilter('success', e.target); });
+$('filterRefusedBtn').addEventListener('click', e => { setFeedFilter('refused', e.target); });
+
+function setFeedFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('#tab-activity .btn-ghost').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderActivityFeed(activityData, true);
+}
+
+// ---------- Reminders & Monitor Polling ----------
+const humanLeft = m => m < 0 ? 'overdue' : m < 60 ? `${Math.round(m)} min left` : m < 2880 ? `${Math.round(m/60)} h left` : `${Math.round(m/1440)} days left`;
+
+async function fetchMonitor() {
+  try {
+    const res = await fetch('/monitor');
+    monitorData = await res.json();
+    
+    // Outbound configuration pill
+    $('outboundModeText').textContent = monitorData.configured ? 'Active Outbound Calls' : 'Dry-Run Mode';
+    $('outboundModeTag').className = `chip-tag ${monitorData.configured ? 'ok' : ''}`;
+
+    const deadlines = monitorData.deadlines || [];
+    $('navReminderCount').textContent = deadlines.length;
+    $('cardDeadlinesCount').textContent = deadlines.length;
+
+    renderReminders(deadlines);
+  } catch {}
+}
+
+function renderReminders(list) {
+  const container = $('remindersContainer');
+  if (!list.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <p>You have no pending deadlines. Create one to enable automated reminder calls.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(d => {
+    const isLate = d.minutesLeft < 0;
+    const isSoon = d.minutesLeft >= 0 && d.minutesLeft < 180;
+    const badgeClass = isLate ? 'overdue' : isSoon ? 'due-soon' : '';
+    const dateFormatted = new Date(d.due).toLocaleString('en-IN', {
+      weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit'
+    });
+
+    return `
+      <div class="reminder-card ${badgeClass}">
+        <div class="reminder-info">
+          <b>${esc(d.title)}</b>
+          <small>${esc(dateFormatted)} · ${humanLeft(d.minutesLeft)}</small>
+        </div>
+        <div>
+          <button class="btn btn-secondary btn-sm mark-done-btn" data-id="${esc(d.id)}">
+            ✓ Submitted
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Reminders event handlers
+$('remindersContainer').addEventListener('click', async e => {
+  const btn = e.target.closest('.mark-done-btn');
+  if (!btn) return;
+  const id = btn.dataset.id;
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  try {
+    const res = await fetch('/monitor/done', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    const r = await res.json();
+    showToast(r.result || 'Deadline marked submitted!', 'success');
+    fetchMonitor();
+  } catch {
+    showToast('Failed to mark deadline done.', 'error');
+  }
+});
+
+$('addReminderForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const title = $('newReminderTitle').value.trim();
+  const when = $('newReminderWhen').value.trim();
+  if (!title || !when) return;
+
+  try {
+    const res = await fetch('/monitor/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, when })
+    });
+    const r = await res.json();
+    if (res.ok) {
+      showToast(r.result, 'success');
+      $('newReminderTitle').value = '';
+      $('newReminderWhen').value = '';
+      fetchMonitor();
+    } else {
+      showToast(r.result || 'Could not add deadline', 'error');
+    }
+  } catch {
+    showToast('Network error while adding reminder.', 'error');
+  }
+});
+
+document.querySelectorAll('.quick-time-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $('newReminderWhen').value = btn.dataset.time;
+  });
+});
+
+$('testCallBtn').addEventListener('click', async () => {
+  const fb = $('testCallFeedback');
+  fb.textContent = 'Calling your phone...';
+  try {
+    const res = await fetch('/monitor/test-call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Hi, Voxora here. This is a test of your urgent call. Everything is working.' })
+    });
+    const r = await res.json();
+    if (r.ok) {
+      fb.textContent = 'Calling you now. Pick up!';
+      showToast('Urgent call initiated!', 'success');
+    } else if (r.dryRun) {
+      fb.textContent = 'Dry run mode: Add Sarvam outbound keys in .env to place real calls.';
+      showToast('Simulated call recorded in dry-run mode.', 'info');
+    } else {
+      fb.textContent = `Call failed: ${r.error || r.status || 'Check credentials'}`;
+      showToast('Failed to place outbound call.', 'error');
+    }
+  } catch {
+    fb.textContent = 'Connection error.';
+  }
+});
+
+// ---------- File Finder Logic ----------
+async function performFileSearch(query) {
+  const container = $('filesResultsContainer');
+  container.innerHTML = `
+    <div class="empty-state" style="grid-column: 1 / -1;">
+      <p>Searching indexed documents on your laptop...</p>
+    </div>`;
+
+  try {
+    const res = await fetch(`/api/files?q=${encodeURIComponent(query)}&limit=18`);
+    const data = await res.json();
+    
+    if (!data.ok || !data.files.length) {
+      container.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <p>No files found matching “${esc(query)}” in Desktop, Documents, Downloads or OneDrive.</p>
+        </div>`;
+      return;
+    }
+
+    renderFileList(data.files);
+  } catch (err) {
+    container.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><p>Failed to search files.</p></div>`;
+  }
+}
+
+function renderFileList(files) {
+  const container = $('filesResultsContainer');
+  const getIconClass = ext => {
+    if (ext === '.pdf') return 'pdf';
+    if (['.doc', '.docx'].includes(ext)) return 'doc';
+    if (['.xls', '.xlsx', '.csv'].includes(ext)) return 'sheet';
+    return '';
+  };
+
+  container.innerHTML = files.map(f => `
+    <div class="file-item-card" data-ext="${esc(f.ext)}">
+      <div class="file-top">
+        <div class="file-ext-icon ${getIconClass(f.ext)}">
+          ${esc(f.ext.replace('.', '').toUpperCase())}
+        </div>
+        <div class="file-details">
+          <div class="file-name" title="${esc(f.file)}">${esc(f.file)}</div>
+          <div class="file-meta">
+            <span>📁 ${esc(f.where)}</span>
+            <span>🕒 Edited ${esc(f.when)}</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <button class="btn btn-secondary btn-sm open-file-btn" data-path="${esc(f.full)}" style="width:100%;">
+          Open File
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+$('fileSearchBtn').addEventListener('click', () => {
+  const q = $('fileSearchInput').value.trim();
+  if (q) performFileSearch(q);
+});
+
+$('fileSearchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const q = $('fileSearchInput').value.trim();
+    if (q) performFileSearch(q);
+  }
+});
+
+// File category filtering
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const filter = chip.dataset.filter;
+    const cards = document.querySelectorAll('.file-item-card');
+    cards.forEach(card => {
+      if (filter === 'all') {
+        card.style.display = 'flex';
+      } else {
+        const allowed = filter.split(',');
+        card.style.display = allowed.includes(card.dataset.ext) ? 'flex' : 'none';
+      }
+    });
+  });
+});
+
+// Open file on laptop
+$('filesResultsContainer').addEventListener('click', async e => {
+  const btn = e.target.closest('.open-file-btn');
+  if (!btn) return;
+  const filePath = btn.dataset.path;
+  btn.disabled = true;
+  btn.textContent = 'Opening...';
+  try {
+    const res = await fetch('/api/open-file', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file: filePath })
+    });
+    const r = await res.json();
+    if (r.ok) {
+      showToast(r.result, 'success');
+    } else {
+      showToast(r.error || 'Cannot open file.', 'error');
+    }
+  } catch {
+    showToast('Failed to open file.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Open File';
+  }
+});
+
+// ---------- Focus Timer Logic ----------
+const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 44; // ~276.46
+
+function updateTimerDisplay() {
+  const mins = Math.floor(timerState.remainingSeconds / 60);
+  const secs = timerState.remainingSeconds % 60;
+  const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  
+  $('timerClockDisplay').textContent = timeStr;
+  $('dashFocusTime').textContent = timeStr;
+  $('timerBadgeDisplay').textContent = timerState.status;
+  $('dashFocusStatus').textContent = timerState.status === 'RUNNING' ? 'In Progress' : timerState.status;
+
+  const totalSecs = timerState.durationMins * 60;
+  const progressRatio = (totalSecs - timerState.remainingSeconds) / totalSecs;
+  const offset = CIRCLE_CIRCUMFERENCE * (1 - progressRatio);
+  $('timerProgressCircle').style.strokeDashoffset = offset;
+}
+
+function startTimer() {
+  if (timerState.status === 'RUNNING') return;
+  
+  const topicInput = $('focusTopicInput').value.trim();
+  timerState.topic = topicInput || 'Focus Session';
+  $('activeFocusLabel').textContent = timerState.topic;
+  $('dashFocusTopic').textContent = timerState.topic;
+
+  timerState.status = 'RUNNING';
+  $('timerStartBtn').style.display = 'none';
+  $('timerPauseBtn').style.display = 'inline-flex';
+  updateTimerDisplay();
+
+  // Optionally launch background focus music
+  if ($('focusMusicToggle').checked && timerState.remainingSeconds === timerState.durationMins * 60) {
+    fetch('/api/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'open_website', input: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' })
+    }).catch(() => {});
+  }
+
+  timerState.intervalId = setInterval(() => {
+    if (timerState.remainingSeconds > 0) {
+      timerState.remainingSeconds--;
+      updateTimerDisplay();
+    } else {
+      completeTimer();
+    }
+  }, 1000);
+}
+
+function pauseTimer() {
+  if (timerState.status !== 'RUNNING') return;
+  clearInterval(timerState.intervalId);
+  timerState.status = 'PAUSED';
+  $('timerStartBtn').style.display = 'inline-flex';
+  $('timerStartBtn').querySelector('span').textContent = 'Resume';
+  $('timerPauseBtn').style.display = 'none';
+  updateTimerDisplay();
+}
+
+function resetTimer() {
+  clearInterval(timerState.intervalId);
+  timerState.remainingSeconds = timerState.durationMins * 60;
+  timerState.status = 'READY';
+  $('timerStartBtn').style.display = 'inline-flex';
+  $('timerStartBtn').querySelector('span').textContent = 'Start Session';
+  $('timerPauseBtn').style.display = 'none';
+  updateTimerDisplay();
+}
+
+function completeTimer() {
+  clearInterval(timerState.intervalId);
+  timerState.status = 'COMPLETED';
+  $('timerStartBtn').style.display = 'inline-flex';
+  $('timerStartBtn').querySelector('span').textContent = 'Start Another';
+  $('timerPauseBtn').style.display = 'none';
+  updateTimerDisplay();
+
+  showToast(`Focus session on ${timerState.topic} completed! Take a break.`, 'success');
+
+  // Spoken feedback on laptop
+  if ($('focusVoiceAnnounce').checked) {
+    fetch('/api/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        action: 'speak_on_laptop', 
+        input: `Time is up. Your ${timerState.durationMins} minute focus session on ${timerState.topic} is done. Great work.` 
+      })
+    }).catch(() => {});
+  }
+}
+
+$('timerStartBtn').addEventListener('click', startTimer);
+$('timerPauseBtn').addEventListener('click', pauseTimer);
+$('timerResetBtn').addEventListener('click', resetTimer);
+
+document.querySelectorAll('.preset-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    timerState.durationMins = Number(chip.dataset.mins || 25);
+    resetTimer();
+  });
+});
+
+// ---------- Quick Actions Execution ----------
+document.querySelectorAll('[data-action]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const action = btn.dataset.action;
+    const input = btn.dataset.input || '';
+
+    try {
+      const res = await fetch('/api/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, input })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        showToast(data.result, 'success');
+      } else {
+        showToast(data.result || 'Action failed', 'error');
+      }
+      fetchActivity();
+    } catch {
+      showToast('Failed to trigger action.', 'error');
+    }
+  });
+});
+
+// Screen lock confirmation
+$('quickLockBtn').addEventListener('click', async () => {
+  if (confirm('Are you sure you want to lock your laptop screen now?')) {
+    try {
+      const res = await fetch('/api/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'lock_screen' })
+      });
+      const data = await res.json();
+      showToast(data.result || 'Locking laptop...', 'info');
+    } catch {
+      showToast('Failed to lock screen.', 'error');
+    }
+  }
+});
+
+// ---------- Polling Cycles ----------
+fetchStatus();
+fetchBattery();
+fetchActivity();
+fetchMonitor();
+
+// Polling interval
+setInterval(fetchActivity, 850);
+setInterval(fetchMonitor, 4000);
+setInterval(fetchStatus, 5000);
+setInterval(fetchBattery, 30000);
+
+// Initialize display
+updateTimerDisplay();
 </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
-// ARRC's watchful side: deadlines and laptop health. When something needs the owner,
-// ARRC phones them through Sarvam's instant outbound call API.
+// Voxora's watchful side: deadlines and laptop health. When something needs the owner,
+// Voxora phones them through Sarvam's instant outbound call API.
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -96,7 +96,7 @@ export function createMonitor({ root, env, record, battery }) {
   async function callOwner(message, reason) {
     const today = new Date().toDateString();
     if (state.day !== today) { state.day = today; state.callsToday = 0; }
-    const entry = { action: 'call_owner', input: reason, caller: 'ARRC → you' };
+    const entry = { action: 'call_owner', input: reason, caller: 'Voxora -> you' };
     if (!configured()) {
       record({ ...entry, result: `DRY RUN (outbound not configured): "${message}"` });
       return { ok: false, dryRun: true };
@@ -150,8 +150,8 @@ export function createMonitor({ root, env, record, battery }) {
       if (!due.length && !overdue) continue;
       if (!canCall(left <= 120)) continue;
       const msg = overdue
-        ? `Hi, ARRC here. This is urgent. ${d.title} was due just now and it is not marked as submitted. Please take a look right away. Say submitted if you have done it.`
-        : `Hi, ARRC here. Heads up, ${d.title} is due in ${human(left)}, at ${clock(new Date(d.due))}. Please take a look. Say submitted once you are done and I will stop reminding you.`;
+        ? `Hi, Voxora here. This is urgent. ${d.title} was due just now and it is not marked as submitted. Please take a look right away. Say submitted if you have done it.`
+        : `Hi, Voxora here. Heads up, ${d.title} is due in ${human(left)}, at ${clock(new Date(d.due))}. Please take a look. Say submitted once you are done and I will stop reminding you.`;
       const r = await callOwner(msg, `deadline: ${d.title}`);
       d.notified.push(...due, ...(overdue ? [0] : []));
       changed = true;
@@ -165,7 +165,7 @@ export function createMonitor({ root, env, record, battery }) {
       if (b.charging || b.pct > 20) state.batteryAlerted = false;
       else if (b.pct <= 15 && !state.batteryAlerted && canCall(true)) {
         state.batteryAlerted = true;
-        await callOwner(`Hi, ARRC here. Urgent: your laptop battery is at ${b.pct} percent and it is not charging. Please plug it in now or you may lose your work.`, `battery ${b.pct}%`);
+        await callOwner(`Hi, Voxora here. Urgent: your laptop battery is at ${b.pct} percent and it is not charging. Please plug it in now or you may lose your work.`, `battery ${b.pct}%`);
       }
     }
   }

@@ -1,96 +1,162 @@
-# ARRC
+# Voxora
 
-**Call a phone number, speak in Hindi, English, Telugu or any mix, and your laptop does it. And when something needs you, ARRC calls you.**
+**Your Voice. Your Workflow.**
 
-ARRC is a phone-line assistant for your own computer, built on Sarvam AI. A Sarvam Voice Agent answers an Indian phone number: **Saaras** listens, **Sarvam-105B** decides what to do, **Bulbul** speaks back. When you ask for something, the agent calls a small action server on your laptop through a secure tunnel, and the laptop does it. The same server keeps watch, and when a deadline is close or your battery is about to die, it phones you through Sarvam's outbound call API.
+> **Voxora** is a multilingual, voice-enabled desktop productivity assistant designed to help users manage tasks, find files, set reminders, and control supported laptop functions through an AI-powered workflow.
+
+Dial your dedicated phone number, speak in Hindi, English, Telugu, or any natural mix, and your laptop executes your commands in real time. And when a deadline is imminent or your battery is critically low, Voxora phones you.
 
 ```
-                 ┌──────────── you call ARRC ────────────┐
-Your phone ◀────▶ Sarvam number ◀──▶ Sarvam Voice Agent (Saaras · Sarvam-105B · Bulbul)
-     ▲                                     │ HTTPS tool call: Bearer token + caller number
-     │                                     ▼
-     │                cloudflared tunnel ──▶ server.js on your laptop ──▶ fixed list of actions
-     │                                               │
-     └──── ARRC calls you (Sarvam outbound API) ◀────┤ monitor: deadlines, battery, focus timer
-                                                     └─▶ ARRC console (localhost only)
+                 ┌─────────── You dial Voxora ───────────┐
+Your Phone ◀────▶ Sarvam Phone Line ◀──▶ Sarvam Voice Agent (Saaras · Sarvam-105B · Bulbul)
+     ▲                                            │ HTTPS tool call: Bearer token + Caller Hash
+     │                                            ▼
+     │                      cloudflared tunnel ──▶ server.js on your laptop ──▶ 22 Safe Actions
+     │                                                     │
+     └──── Voxora calls you (Sarvam Outbounds) ◀───────────┤ monitor: Deadlines, Battery, Focus Timer
+                                                           └─▶ Voxora Console (http://localhost:3710)
 ```
 
-## The two things that matter
+---
 
-**1. Find my file.** "Mera EM5120 assignment kholo." ARRC searches your Desktop, Documents, Downloads and OneDrive, opens the best match on screen and tells you which file it is and when it was last edited. Course codes have to match exactly, so "EM5120" never opens your SE5723 report by mistake. The index of about 14,000 files builds in the background in under 3 seconds and refreshes every 10 minutes.
+## Key Capabilities
 
-**2. Focus session.** "25 minute focus session for my DBMS assignment." ARRC opens that assignment, starts focus music and runs the timer. When time is up the laptop says so out loud and ARRC phones you.
+### 1. Document & File Discovery ("Find My File")
+- *"Mera EM5120 assignment kholo"* / *"Find project proposal PDF"*
+- Voxora searches your local `Desktop`, `Documents`, `Downloads`, `OneDrive`, and `Pictures` directories.
+- Course codes and keywords are verified with intelligent ranking, matching course codes (e.g. `EM5120` will never match an unrelated report).
+- The index of over 7,000+ documents updates incrementally in the background and is instantly searchable via voice or the Voxora web dashboard.
 
-## ARRC calls you
+### 2. Focus Sessions & Deep Work Sprints
+- *"25 minute focus session for my DBMS assignment"*
+- Automatically opens matching reference materials or documents on your laptop.
+- Launches ambient focus music (YouTube Lo-Fi stream) and starts the session timer.
+- Announces completion over laptop speakers and triggers an urgent phone follow-up when the session concludes.
 
-Tell ARRC on a call, "remind me, DBMS project due tomorrow 5 pm", or add it on the console. ARRC then phones you:
+### 3. Automated Deadlines & Proactive Voice Calls
+- *"Remind me, DBMS project due tomorrow 5 pm"*
+- Stored safely in local persistent storage (`deadlines.json`).
+- Voxora phones you through Sarvam's Outbound Call API at strategic intervals:
+  - 24 hours, 3 hours, 1 hour, and 15 minutes before due time.
+  - At the due moment if the assignment is still unsubmitted.
+  - When your laptop unplugged battery drops below 15%.
+- Say *"Submitted"* or click "✓ Submitted" on the dashboard to cancel subsequent reminders.
+- **Safety guardrails**: Rate-limited to max 1 call per 10 minutes, max 8 calls per day, with quiet hours strictly enforced between 11 PM and 7 AM unless due within 2 hours.
 
-- 24 hours, 3 hours, 1 hour and 15 minutes before it's due
-- at the due time, if it still isn't marked submitted ("This is urgent, please take a look")
-- when your laptop battery drops to 15% while unplugged
-- when a focus session ends
+---
 
-Say "submitted" on any call and the reminders for that deadline stop. Guard rails: at most one call every 10 minutes and 8 a day, and no calls between 11 pm and 7 am unless something is due within 2 hours.
+## Voice Commands Reference
 
-## Everything you can say
-
-| Say | ARRC does |
+| What You Say | What Voxora Does |
 |---|---|
-| "Mera EM5120 assignment kholo" | Finds and opens the file |
-| "25 minute focus session for my assignment" | File, focus music, timer, then calls you |
-| "Remind me, DBMS project due tomorrow 5 pm" | Saves the deadline and calls you before it |
-| "What's due?" / "DBMS submitted" | Reads deadlines / stops the reminders |
-| "YouTube pe Arijit Singh ke gaane chalao" | Finds and plays it |
-| "IRCTC kholo" / "open Gmail" | Opens the site |
-| "Work mode on karo" | Opens VS Code, Gmail and Calendar |
-| "5 minute ka timer lagao chai ke liye" | Sets a timer the laptop announces out loud |
-| "Laptop se bolo, hello judges" | The laptop speakers say it |
-| "Volume kam karo" / "next song" | Media keys |
-| "Take a screenshot" | Saved to Pictures/Jarvis |
-| "Draft an email to … about …" | Opens a Gmail draft. Never sends it |
-| "Directions to Charminar" / "weather in Hyderabad" | Maps / weather on screen |
-| "Note karo …" / "mere notes padho" | Saves and reads back notes |
-| "Battery kitni hai?" | Time, date and battery |
-| "Lock my laptop" | Asks first, then locks |
+| *"Mera EM5120 assignment kholo"* | Finds and opens matching document with default viewer |
+| *"25 minute focus session for my assignment"* | Opens document, plays focus stream, tracks session, and calls you |
+| *"Remind me, DBMS project due tomorrow 5 pm"* | Creates a tracked deadline and schedules phone reminders |
+| *"What's due?"* / *"DBMS submitted"* | Spoken summary of pending deadlines / marks deadline finished |
+| *"YouTube pe Arijit Singh ke gaane chalao"* | Searches and launches song on YouTube |
+| *"IRCTC kholo"* / *"open Gmail"* | Safely opens the designated website |
+| *"Work mode on karo"* | Launches VS Code, Gmail, and Google Calendar |
+| *"5 minute ka timer lagao chai ke liye"* | Sets a timer announced out loud via laptop speakers |
+| *"Laptop se bolo, hello team"* | Windows text-to-speech speaks the sentence |
+| *"Volume kam karo"* / *"next song"* | Media key controls (volume up/down, mute, play/pause, skip) |
+| *"Take a screenshot"* | Captures entire virtual screen to `Pictures/Jarvis` |
+| *"Draft an email to … about …"* | Pre-populates Gmail draft (never sends automatically) |
+| *"Directions to Charminar"* / *"weather in Hyderabad"* | Opens Google Maps / Google Weather |
+| *"Note karo …"* / *"mere notes padho"* | Appends timestamped note to `Documents/Jarvis Notes.md` / reads aloud |
+| *"Battery kitni hai?"* | Checks CIM battery percentage, charging state, date & time |
+| *"Lock my laptop"* | Prompts for confirmation, then safely invokes Windows screen lock |
 
-22 actions in total. See `ACTIONS` in [server.js](server.js), [files.js](files.js) for file search and [monitor.js](monitor.js) for deadlines and outbound calls.
+---
 
-## Safety model
+## Security & Safety Model
 
-A phone line that controls a computer has to be locked down. ARRC:
+Running an agent that can interact with your desktop requires strict isolation:
 
-- **Runs only a fixed allowlist of actions.** No shell commands, no file deletion, no keystroke typing of caller text, no sending of messages or payments.
-- **Only opens documents.** File search indexes document and media types (PDF, Office, text, images, video). Programs and scripts are never indexed, so they can never be opened by voice.
-- **Never puts caller text on a command line.** Text that must reach PowerShell (words to speak, a screenshot path) travels in environment variables and is only spoken or saved, never executed.
-- **Requires a secret bearer token** on every tool call (constant-time comparison).
-- **Only obeys the owner's phone.** The server checks the caller against the owner's number. Other callers get "Not authorised" and the agent ends the call.
-- **Keeps the console private.** Anything arriving through the tunnel can reach only the authenticated `/action` endpoint. The console, activity feed, deadlines and test-call button answer on localhost only.
-- **De-duplicates bursts.** The same request repeated within 10 seconds runs once.
-- **Doesn't nag.** Outbound calls are rate-limited and respect quiet hours.
+- **Strict Allowlist of 22 Fixed Actions**: No arbitrary terminal/shell access. Callers cannot pass commands, execute scripts, or delete files.
+- **Document-Only Indexing**: The file index strictly includes documents and media (`.pdf`, `.docx`, `.pptx`, `.xlsx`, `.txt`, `.md`, `.png`, `.jpg`). Executables, scripts (`.exe`, `.bat`, `.ps1`, `.sh`), and binaries are excluded.
+- **Command Injection Prevention**: Text passed to PowerShell (spoken sentences, file paths) travels solely in sanitized environment variables, never interpolated in execution strings.
+- **Constant-Time Bearer Token Auth**: Inbound requests from the Sarvam Voice Agent require a secret `JARVIS_TOKEN` matched via `crypto.timingSafeEqual`.
+- **Owner Caller-ID Lockdown**: The server verifies the incoming caller against the owner's phone number or hashed caller ID. Non-owner callers are refused with HTTP 401.
+- **Local Console Isolation**: Dashboard and local management endpoints (`/monitor/*`, `/api/*`) verify that incoming requests are not arriving from the public Cloudflare tunnel (`cf-connecting-ip` check). The public tunnel exposes only `/action` and `/tools/*`.
+- **Burst De-duplication**: Repeated requests within 10 seconds are de-duplicated to prevent double actions during conversational bursts.
 
-## Run it
+---
 
-Windows, Node 18+, [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/).
+## Installation & Setup
 
+### Prerequisites
+- Windows 10/11
+- Node.js 18+
+- [Cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) (for exposing the webhook to Sarvam)
+
+### Step 1: Clone & Configure
 ```bash
-cp .env.example .env      # set JARVIS_TOKEN (random), OWNER_NUMBER and the Sarvam outbound values
-node server.js
+# Navigate to directory
+cd arrc
+
+# Copy sample configuration
+cp .env.example .env
 ```
 
+Edit `.env`:
+```env
+PORT=3710
+JARVIS_TOKEN=your_random_secret_token_here
+OWNER_NUMBER=919876543210
+ALLOW_NO_CALLER=true
+JARVIS_PHONE=+91XXXXXXXXXX
+```
+
+### Step 2: Start Voxora Server
+```bash
+npm start
+# or: node server.js
+```
+The server will start on `http://localhost:3710`.
+
+### Step 3: Start Cloudflare Tunnel
 ```bash
 cloudflared tunnel --url http://localhost:3710
 ```
+Copy the printed `https://<random>.trycloudflare.com` address. This is your public webhook URL for the Sarvam agent tools.
 
-Open http://localhost:3710 for the ARRC console. Then set up the Sarvam agent and tool with the tunnel URL: step-by-step in [AGENT-SETUP.md](AGENT-SETUP.md).
+### Step 4: Open the Voxora Dashboard
+Open `http://localhost:3710` in any web browser to view the Voxora console:
+- **Dashboard**: System telemetry, owner lock status, quick action buttons, and live engine status.
+- **File Finder**: Search 7,000+ local documents with category filters and 1-click open.
+- **Focus Sessions**: Interactive Pomodoro timer with ambient music and speech completion.
+- **Reminders**: Visual deadline manager with "Mark Submitted" and urgent call testing.
+- **Activity Log**: Real-time event audit feed with success/refused filtering.
+- **Settings**: Configuration inspection with zero secret leakage.
 
-For outbound calls, get the org and workspace IDs from **Voice Agents → Settings → API Key** in Indus, create an API key on the same page, and put all three in `.env`. Without them ARRC runs in dry-run mode and logs the calls it would have made.
+For configuring the Sarvam AI Voice Agent (Saaras, Sarvam-105B, Bulbul), refer to [AGENT-SETUP.md](AGENT-SETUP.md).
 
-A quick tunnel gets a new address whenever the laptop sleeps or restarts, so update the tool URL in Sarvam when that happens, or use a named Cloudflare tunnel for a fixed address.
+---
 
-## Next
+## Configuration Requirements & Integrations
 
-- **Urgent-email alerts:** read new Gmail, let Sarvam-105B judge tone and urgency, and call the owner about the ones that matter.
-- **Send email with spoken confirmation:** ARRC reads the email back on the call and sends only after a clear yes.
-- **Calendar-aware calls:** read the owner's calendar and call before exams and meetings.
+| Feature | Requirement | Fallback / Behavior if Missing |
+|---|---|---|
+| **Local Dashboard & Actions** | None (Node.js built-ins) | Always active on `http://localhost:3710` |
+| **File Search & Open** | Local Desktop/Documents/Downloads | Uses cached file index from local directories |
+| **Voice Inbound Agent** | Sarvam Voice Agent + `cloudflared` | Dashboard can still test actions locally |
+| **Outbound Urgent Phone Calls** | `SARVAM_WORKSPACE_KEY`, `SARVAM_ORG_ID`, `SARVAM_WORKSPACE_ID`, `ARRC_APP_ID` in `.env` | Operates in **Dry-Run Mode**; logs simulated calls safely without dialing |
+| **Owner Verification** | `OWNER_NUMBER` in `.env` | If left empty, allows local/test calls |
 
-Built for the Sarvam AI hackathon, October 2026.
+---
+
+## Known Limitations
+
+1. **Operating System**: Laptop actions utilize native Windows utilities (`powershell.exe`, `explorer.exe`, `taskmgr.exe`, `rundll32.exe`). Running on macOS or Linux requires platform-specific action handlers.
+2. **Dynamic Quick Tunnel Addresses**: Cloudflare quick tunnels generate a new hostname when restarted; use a named Cloudflare tunnel or fixed domain for permanent deployments.
+3. **Outbound Calling Quota**: Sarvam outbound calls are rate-limited to avoid excessive dialing (max 8 per day, quiet hours 11 PM to 7 AM).
+4. **Email Drafting**: Gmail actions open a draft composer window in the browser. Out of safety, emails are never dispatched automatically.
+
+---
+
+## Historical Attribution & License
+
+- **Current Application**: Voxora ("Your Voice. Your Workflow.")
+- **Upstream Project & Origin**: Originally designed and created as **ARRC** for the **Sarvam AI Hackathon, October 2026**.
+- **Authorship**: All original upstream architecture, prompts, and safety design are preserved under the original project attribution.
+- **License**: MIT License. See project files for details.
